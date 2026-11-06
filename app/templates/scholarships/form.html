@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Nova Bolsa Professor | FITGESTAO{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>Conceder Bolsa Professor</h1><p>O instrutor e um único familiar recebem 100% de gratuidade.</p></div></div>
+<form method="post" class="card form-grid">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Instrutor <select name="instructor_id" required><option value="">Selecione</option>{% for s in instructors if s.status == 'ativo' %}<option value="{{ s.id }}">{{ s.name }} — {{ s.document }}</option>{% endfor %}</select></label>
+  <label>Familiar indicado (opcional) <select name="family_id"><option value="">Nenhum</option>{% for s in students if s.status == 'ativo' %}<option value="{{ s.id }}">{{ s.name }} — {{ s.document }}</option>{% endfor %}</select></label>
+  <label>Parentesco <input name="relationship_type" maxlength="60" placeholder="Ex.: filho, mãe, cônjuge"></label>
+  <label>Início <input type="date" name="start_date" value="{{ request.form.get('start_date', today.isoformat()) }}" required></label>
+  <label>Fim (opcional) <input type="date" name="end_date"></label>
+  <label class="full">Observações <textarea name="notes" maxlength="255"></textarea></label>
+  <div class="full"><button class="button primary" type="submit">Conceder bolsa</button> <a class="button" href="{{ url_for('scholarships.index') }}">Cancelar</a></div>
+</form>
+{% endblock %}

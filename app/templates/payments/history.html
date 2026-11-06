@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Histórico Financeiro · FITGESTAO{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>Histórico Financeiro</h1><p class="muted">Consulta dos registros financeiros, sem ações de recebimento ou alteração.</p></div></div>
+<form class="card" method="get" action="{{ url_for('payments.history') }}" style="margin-bottom:16px"><div class="toolbar">
+<label>Aluno<br><input type="text" name="q" value="{{ q }}" placeholder="Nome do aluno"></label>
+<label>Status<br><select name="status"><option value="">Todos</option>{% for st in ['pago','pendente','cancelado','isento'] %}<option value="{{ st }}" {% if status == st %}selected{% endif %}>{{ st|title }}</option>{% endfor %}</select></label>
+<label>De<br><input type="date" name="inicio" value="{{ inicio }}"></label><label>Até<br><input type="date" name="fim" value="{{ fim }}"></label>
+<button class="btn small" type="submit">Filtrar</button><a class="btn small secondary" href="{{ url_for('payments.history') }}">Limpar</a>
+</div></form>
+<div class="card" style="margin-bottom:16px"><strong>Total com status pago nesta consulta: R$ {{ '%.2f'|format(total_paid) }}</strong></div>
+<div class="card">{% if payments %}<table><thead><tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Pago em</th><th>Forma</th><th>Status</th><th>Registrado em</th><th>Observações</th></tr></thead><tbody>
+{% for p in payments %}<tr><td>{{ p.enrollment.student.name }}</td><td>{{ p.enrollment.plan.name }}</td><td>R$ {{ '%.2f'|format(p.amount) }}</td><td>{{ p.due_date.strftime('%d/%m/%Y') if p.due_date else '—' }}</td><td>{{ p.paid_at.strftime('%d/%m/%Y') if p.paid_at else '—' }}</td><td>{{ p.method }}</td><td><span class="badge {{ p.status }}">{{ p.status }}</span></td><td>{{ p.created_at.strftime('%d/%m/%Y %H:%M') if p.created_at else '—' }}</td><td>{{ p.notes or '—' }}</td></tr>{% endfor %}
+</tbody></table>{% else %}<p class="muted">Nenhum registro financeiro encontrado para os filtros informados.</p>{% endif %}</div>
+{% endblock %}

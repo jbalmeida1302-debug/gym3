@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login · Academia</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="card login-card">
+      <h1>FIT<span style="color:var(--accent)">GESTAO</span></h1>
+      <p class="muted">Acesso da recepção</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flash">
+            {% for category, message in messages %}
+              <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+      <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="field">
+          {{ form.username.label }}
+          {{ form.username() }}
+        </div>
+        <div class="field">
+          {{ form.password.label }}
+          {{ form.password() }}
+        </div>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+      <p class="muted" style="margin-top:16px">Usuário inicial: admin / admin123</p>
+    </div>
+  </div>
+</body>
+</html>

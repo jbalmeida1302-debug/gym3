@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h1>{{ title }}</h1>
+  <a class="btn secondary" href="{{ url_for('enrollments.list_enrollments') }}">Voltar</a>
+</div>
+<div class="card" style="max-width:640px">
+  {% if not form.plan_id.choices %}
+    <p class="muted">Cadastre um plano disponível antes de matricular.</p>
+  {% elif not form.student_id.choices %}
+    <p class="muted">Cadastre um aluno antes de matricular.</p>
+  {% else %}
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% for field in [form.student_id, form.plan_id, form.start_date] %}
+    <div class="field">
+      {{ field.label }}
+      {{ field() }}
+      {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="btn" type="submit">Salvar</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

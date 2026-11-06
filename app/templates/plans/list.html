@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Planos · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Planos</h1>
+    <p class="muted">Mensalidades e durações</p>
+  </div>
+  <a class="btn" href="{{ url_for('plans.create') }}">Novo plano</a>
+</div>
+<div class="card">
+  {% if plans %}
+  <table>
+    <thead><tr><th>Nome</th><th>Duração</th><th>Valor</th><th>Ciclo</th><th>Tolerância</th><th>Disponível</th><th></th></tr></thead>
+    <tbody>
+      {% for p in plans %}
+      <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.duration_days }} dias</td>
+        <td>R$ {{ '%.2f'|format(p.price) }}</td>
+        <td>{{ p.billing_cycle|capitalize }}</td>
+        <td>{{ p.grace_days }} dias</td>
+        <td>{{ 'Sim' if p.active else 'Não' }}</td>
+        <td><a href="{{ url_for('plans.edit', plan_id=p.id) }}">Editar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Cadastre o primeiro plano para começar a matricular alunos.</p>
+  {% endif %}
+</div>
+{% endblock %}

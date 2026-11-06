@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h1>{{ title }}</h1>
+  <a class="btn secondary" href="{{ url_for('students.list_students') }}">Voltar</a>
+</div>
+<div class="card" style="max-width:640px">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% for field in [form.name, form.document, form.phone, form.email, form.birth_date, form.status, form.is_instructor] %}
+    <div class="field">
+      {{ field.label }}
+      {{ field() }}
+      {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="btn" type="submit">Salvar</button>
+  </form>
+</div>
+{% endblock %}

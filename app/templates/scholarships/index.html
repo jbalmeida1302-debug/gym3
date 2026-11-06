@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Bolsa Professor | FITGESTAO{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>Bolsa Professor</h1><p>Gratuidade integral para o instrutor e um familiar indicado.</p></div><a class="button primary" href="{{ url_for('scholarships.create') }}">Nova bolsa</a></div>
+<div class="card">
+  {% if scholarships %}
+  <div class="table-wrap"><table><thead><tr><th>Instrutor</th><th>Familiar</th><th>Parentesco</th><th>Vigência</th><th>Status</th><th>Histórico / ações</th></tr></thead><tbody>
+  {% for b in scholarships %}<tr><td>{{ b.instructor.name }}</td><td>{{ b.family.name if b.family else '—' }}</td><td>{{ b.relationship_type or '—' }}</td><td>{{ b.start_date.strftime('%d/%m/%Y') }} até {{ b.end_date.strftime('%d/%m/%Y') if b.end_date else 'indeterminado' }}</td><td>{{ b.status|capitalize }}{% if b.status == 'ativa' and not b.instructor.status == 'ativo' %} — revisar: instrutor inativo{% elif b.status == 'ativa' and not b.is_valid %} (fora da vigência){% endif %}</td><td>
+  {% for event in b.events %}<small>{{ event.created_at.strftime('%d/%m/%Y %H:%M') if event.created_at else '' }} — {{ event.action }}{% if event.user %} por {{ event.user.name }}{% endif %}</small><br>{% endfor %}
+  {% if b.status != 'encerrada' %}{% if b.status == 'ativa' %}<form method="post" action="{{ url_for('scholarships.change_status', scholarship_id=b.id, action='suspender') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button" type="submit">Suspender</button></form>{% else %}<form method="post" action="{{ url_for('scholarships.change_status', scholarship_id=b.id, action='reativar') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button" type="submit">Reativar</button></form>{% endif %}<form method="post" action="{{ url_for('scholarships.change_status', scholarship_id=b.id, action='encerrar') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button danger" type="submit">Encerrar</button></form>{% endif %}
+  </td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p>Nenhuma Bolsa Professor cadastrada.</p>{% endif %}
+</div>
+{% endblock %}

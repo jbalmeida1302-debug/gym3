@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="muted">Visão geral da academia</p>
+  </div>
+</div>
+
+<div class="grid cards">
+  <div class="card">
+    <h2>Alunos ativos</h2>
+    <div class="stat ok">{{ active_students }}</div>
+  </div>
+  <div class="card">
+    <h2>Matrículas vencidas</h2>
+    <div class="stat warn">{{ expired }}</div>
+  </div>
+  <div class="card">
+    <h2>Pagamentos pendentes</h2>
+    <div class="stat warn">{{ pending_payments }}</div>
+  </div>
+  <div class="card">
+    <h2>Inadimplentes</h2>
+    <div class="stat bad">{{ delinquent_count }}</div>
+  </div>
+  <div class="card">
+    <h2>Receita do mês</h2>
+    <div class="stat ok">R$ {{ '%.2f'|format(revenue) }}</div>
+  </div>
+</div>
+
+<div class="grid two-col" style="margin-top:20px">
+  <section class="card">
+    <h2>Matrículas recentes</h2>
+    {% if recent_enrollments %}
+    <table>
+      <thead><tr><th>Aluno</th><th>Plano</th><th>Vencimento</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for e in recent_enrollments %}
+        <tr>
+          <td><a href="{{ url_for('students.detail', student_id=e.student_id) }}">{{ e.student.name }}</a></td>
+          <td>{{ e.plan.name }}</td>
+          <td>{{ e.end_date.strftime('%d/%m/%Y') }}</td>
+          <td><span class="badge {{ e.status }}">{{ e.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">Nenhuma matrícula ainda.</p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2>Inadimplência</h2>
+    {% if delinquent %}
+    <table>
+      <thead><tr><th>Aluno</th><th>Plano</th><th></th></tr></thead>
+      <tbody>
+        {% for e in delinquent %}
+        <tr>
+          <td>{{ e.student.name }}</td>
+          <td>{{ e.plan.name }}</td>
+          <td><a class="btn small" href="{{ url_for('payments.create', matricula=e.id) }}">Pagar</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">Nenhum inadimplente.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

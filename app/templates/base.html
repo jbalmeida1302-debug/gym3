@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Academia{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <p class="brand">FIT<span>GESTAO</span></p>
+    <nav class="nav">
+      <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">Dashboard</a>
+      <a href="{{ url_for('students.list_students') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('students.') }}">Alunos</a>
+      <a href="{{ url_for('plans.list_plans') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('plans.') }}">Planos</a>
+      <a href="{{ url_for('enrollments.list_enrollments') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('enrollments.') }}">Matrículas</a>
+      <a href="{{ url_for('payments.list_payments') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('payments.') }}">Pagamentos</a>
+      <a href="{{ url_for('payments.history') }}" class="{{ 'active' if request.endpoint == 'payments.history' }}">Histórico financeiro</a>
+      <a href="{{ url_for('scholarships.index') }}" class="{{ 'active' if request.endpoint and request.endpoint.startswith('scholarships.') }}">Bolsa Professor</a>
+      <a href="{{ url_for('facial_access.index') }}" class="{{ 'active' if request.endpoint == 'facial_access.index' }}">Acesso facial</a>
+      <a href="{{ url_for('facial_access.history') }}" class="{{ 'active' if request.endpoint == 'facial_access.history' }}">Histórico de acessos</a>
+    </nav>
+    <div class="user">
+      {{ current_user.name }} · <a href="{{ url_for('auth.logout') }}">Sair</a>
+    </div>
+  </aside>
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>

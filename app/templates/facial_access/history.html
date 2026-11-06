@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Histórico de Acessos · FITGESTAO{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>Histórico de Acessos</h1><p class="muted">Eventos conhecidos e registrados pelo FITGESTAO.</p></div></div>
+<div class="toolbar" style="margin-bottom:16px"><div class="card"><strong>{{ authorized_count }}</strong><br><span class="muted">Eventos autorizados no dia</span></div><div class="card"><strong>{{ unique_students }}</strong><br><span class="muted">Alunos únicos autorizados</span></div></div>
+<form class="card" method="get" action="{{ url_for('facial_access.history') }}" style="margin-bottom:16px"><div class="toolbar">
+<label>Dia<br><input type="date" name="dia" value="{{ dia }}"></label><label>Aluno<br><input type="text" name="aluno" value="{{ aluno }}" placeholder="Nome do aluno"></label>
+<label>Resultado<br><select name="resultado"><option value="">Todos</option>{% for st in ['autorizado','negado','erro','pendente'] %}<option value="{{ st }}" {% if resultado == st %}selected{% endif %}>{{ st|title }}</option>{% endfor %}</select></label>
+<button class="btn small" type="submit">Filtrar</button><a class="btn small secondary" href="{{ url_for('facial_access.history') }}">Hoje</a></div></form>
+<div class="card">{% if logs %}<table><thead><tr><th>Data e hora</th><th>Aluno</th><th>Resultado</th><th>Motivo</th><th>Origem / equipamento</th></tr></thead><tbody>
+{% for log in logs %}<tr><td>{{ log.created_at.strftime('%d/%m/%Y %H:%M:%S') if log.created_at else '—' }}</td><td>{{ log.student_name or '—' }}</td><td><span class="badge {{ 'pago' if log.result == 'autorizado' else 'pendente' }}">{{ log.result }}</span></td><td>{{ log.reason }}</td><td>{{ log.source }}</td></tr>{% endfor %}
+</tbody></table>{% else %}<p class="muted">Nenhum evento encontrado nesta data.</p>{% endif %}</div>
+<p class="muted" style="margin-top:12px">Registros de operações do painel não comprovam passagem física pela catraca. Para registrar entradas reais, é necessário configurar o envio de eventos do fabricante e validar o equipamento.</p>
+{% endblock %}

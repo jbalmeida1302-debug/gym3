@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h1>{{ title }}</h1>
+  <a class="btn secondary" href="{{ url_for('payments.list_payments') }}">Voltar</a>
+</div>
+<div class="card" style="max-width:640px">
+  {% if not form.enrollment_id.choices %}
+    <p class="muted">Crie uma matrícula antes de registrar pagamento.</p>
+  {% else %}
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% for field in [form.enrollment_id, form.amount, form.due_date, form.paid_at, form.method, form.status, form.notes] %}
+    <div class="field">
+      {{ field.label }}
+      {{ field() }}
+      {% if field.errors %}<div class="errors">{{ field.errors[0] }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="btn" type="submit">Salvar</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

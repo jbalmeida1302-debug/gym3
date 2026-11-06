@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Matrículas · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Matrículas</h1>
+    <p class="muted">Vínculo de alunos a planos</p>
+  </div>
+  <a class="btn" href="{{ url_for('enrollments.create') }}">Nova matrícula</a>
+</div>
+<div class="toolbar" style="margin-bottom:16px">
+  <a class="btn small secondary" href="{{ url_for('enrollments.list_enrollments') }}">Todas</a>
+  <a class="btn small secondary" href="{{ url_for('enrollments.list_enrollments', status='ativa') }}">Ativas</a>
+  <a class="btn small secondary" href="{{ url_for('enrollments.list_enrollments', status='vencida') }}">Vencidas</a>
+  <a class="btn small secondary" href="{{ url_for('enrollments.list_enrollments', status='cancelada') }}">Canceladas</a>
+</div>
+<div class="card">
+  {% if enrollments %}
+  <table>
+    <thead>
+      <tr><th>Aluno</th><th>Plano</th><th>Início</th><th>Fim</th><th>Status</th><th>Financeiro</th></tr>
+    </thead>
+    <tbody>
+      {% for e in enrollments %}
+      <tr>
+        <td><a href="{{ url_for('students.detail', student_id=e.student_id) }}">{{ e.student.name }}</a></td>
+        <td>{{ e.plan.name }}</td>
+        <td>{{ e.start_date.strftime('%d/%m/%Y') }}</td>
+        <td>{{ e.end_date.strftime('%d/%m/%Y') }}</td>
+        <td><span class="badge {{ e.status }}">{{ e.status }}</span></td>
+        <td>
+          {% if e.is_delinquent %}
+            <a href="{{ url_for('payments.create', matricula=e.id) }}">inadimplente</a>
+          {% else %}
+            em dia
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Nenhuma matrícula neste filtro.</p>
+  {% endif %}
+</div>
+{% endblock %}

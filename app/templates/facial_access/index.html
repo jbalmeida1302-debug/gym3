@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Acesso facial · FITGESTAO{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>Acesso facial</h1><p class="muted">Integração inicial com o terminal Control iD</p></div></div>
+<div class="card">
+  <h2>Configuração do dispositivo</h2>
+  {% if configured %}
+    <p class="muted">As variáveis de configuração foram encontradas. Teste a conexão antes de iniciar qualquer cadastro.</p>
+  {% else %}
+    <p class="muted">Integração ainda não configurada. Defina CONTROLID_BASE_URL, CONTROLID_USERNAME e CONTROLID_PASSWORD no ambiente e SECRET_KEY para iniciar o Flask.</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('facial_access.test_connection') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn secondary" type="submit" {% if not configured %}disabled{% endif %}>Testar conexão</button>
+  </form>
+</div>
+<div class="card" style="margin-top:16px">
+  <h2>Cadastro facial de alunos</h2>
+  <p class="muted">A permissão exibida considera matrícula, vencimento e tolerância do plano. O bloqueio físico automático depende do terminal operar em modo online e consultar esta regra; em modo standalone, o dispositivo pode continuar aceitando uma face já cadastrada até sincronizarmos a política no próprio terminal.</p>
+  <p class="muted">O terminal precisa estar na mesma rede acessível pelo servidor. Confirme que o ID local do aluno não está sendo usado por outro usuário já cadastrado no terminal.</p>
+  {% if students %}
+  <table><thead><tr><th>Aluno</th><th>Status</th><th>Permissão</th><th>Vínculo Control iD</th><th>Face</th><th>Ação</th></tr></thead><tbody>
+  {% for s in students %}<tr>
+    <td>{{ s.name }}</td><td>{{ s.status }}</td>
+    <td>{% if access_states[s.id][0] %}<span class="badge pago">Liberado</span>{% else %}<span class="badge pendente" title="{{ access_states[s.id][1] }}">Bloqueado</span>{% endif %}</td>
+    <td>{{ s.controlid_user_id or 'Não vinculado' }}</td>
+    <td>{% if s.face_registered %}<span class="badge pago">Confirmada</span>{% else %}<span class="badge pendente">Não confirmada</span>{% endif %}</td>
+    <td><form method="post" action="{{ url_for('facial_access.enroll', student_id=s.id) }}" onsubmit="return confirm('Iniciar cadastro facial no terminal Control iD para {{ s.name|e }}?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn small" type="submit" {% if not configured %}disabled{% endif %}>Cadastrar face</button>
+    </form></td>
+  </tr>{% endfor %}
+  </tbody></table>
+  {% else %}<p class="muted">Cadastre um aluno antes de iniciar o cadastro facial.</p>{% endif %}
+</div>
+<div class="card" style="margin-top:16px">
+  <h2>Histórico de operações</h2>
+  <p class="muted">Este histórico registra as tentativas feitas pelo painel. Ainda não representa todos os eventos reais de passagem da catraca; essa etapa depende do modelo, firmware e modo online/standalone.</p>
+  {% if logs %}<table><thead><tr><th>Data</th><th>Aluno</th><th>Resultado</th><th>Detalhe</th><th>Origem</th></tr></thead><tbody>
+  {% for log in logs %}<tr><td>{{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '—' }}</td><td>{{ log.student_name or '—' }}</td><td>{{ log.result }}</td><td>{{ log.reason }}</td><td>{{ log.source }}</td></tr>{% endfor %}
+  </tbody></table>{% else %}<p class="muted">Nenhuma operação registrada.</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Pagamentos · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Pagamentos</h1>
+    <p class="muted">Recebimentos e inadimplência</p>
+  </div>
+  <a class="btn" href="{{ url_for('payments.create') }}">Registrar pagamento</a>
+</div>
+<div class="toolbar" style="margin-bottom:16px">
+  <a class="btn small secondary" href="{{ url_for('payments.list_payments', view='todos') }}">Todos</a>
+  <a class="btn small secondary" href="{{ url_for('payments.list_payments', view='pendentes') }}">Pendentes</a>
+  <a class="btn small secondary" href="{{ url_for('payments.list_payments', view='inadimplentes') }}">Inadimplentes</a>
+</div>
+
+{% if view == 'inadimplentes' %}
+<div class="card">
+  {% if delinquent %}
+  <table>
+    <thead><tr><th>Aluno</th><th>Plano</th><th>Vencimento da matrícula</th><th>Mensalidade</th><th></th></tr></thead>
+    <tbody>
+      {% for e in delinquent %}
+      <tr>
+        <td>{{ e.student.name }}</td>
+        <td>{{ e.plan.name }}</td>
+        <td>{{ e.end_date.strftime('%d/%m/%Y') }}</td>
+        <td>{% set pend = (e.payments|selectattr('status', 'equalto', 'pendente')|list|first) %}{{ pend.due_date.strftime('%d/%m/%Y') if pend and pend.due_date else '—' }}</td>
+        <td><a class="btn small" href="{{ url_for('payments.create', matricula=e.id) }}">Registrar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Nenhuma matrícula inadimplente.</p>
+  {% endif %}
+</div>
+{% elif view == 'pendentes' %}
+<div class="card">
+  {% if pending %}
+  <table>
+    <thead><tr><th>Aluno</th><th>Valor</th><th>Vencimento</th><th>Forma</th><th></th></tr></thead>
+    <tbody>
+      {% for p in pending %}
+      <tr>
+        <td>{{ p.enrollment.student.name }}</td>
+        <td>R$ {{ '%.2f'|format(p.amount) }}</td>
+        <td>{{ p.due_date.strftime('%d/%m/%Y') if p.due_date else '—' }}</td>
+        <td>{{ p.method }}</td>
+        <td>
+          <form method="post" action="{{ url_for('payments.mark_paid', payment_id=p.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn small" type="submit">Marcar pago</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Nenhum pagamento pendente.</p>
+  {% endif %}
+</div>
+{% else %}
+<div class="card">
+  {% if payments %}
+  <table>
+    <thead><tr><th>Aluno</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Forma</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for p in payments %}
+      <tr>
+        <td>{{ p.enrollment.student.name }}</td>
+        <td>R$ {{ '%.2f'|format(p.amount) }}</td>
+        <td>{{ p.due_date.strftime('%d/%m/%Y') if p.due_date else '—' }}</td>
+        <td>{{ p.paid_at.strftime('%d/%m/%Y') if p.paid_at else '—' }}</td>
+        <td>{{ p.method }}</td>
+        <td><span class="badge {{ p.status }}">{{ p.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Nenhum pagamento registrado.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

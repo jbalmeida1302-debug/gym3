@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }} · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>{{ student.name }}</h1>
+    <p class="muted">CPF {{ student.document }} · <span class="badge {{ student.status }}">{{ student.status }}</span></p>
+  </div>
+  <div class="actions">
+    <a class="btn secondary" href="{{ url_for('students.edit', student_id=student.id) }}">Editar</a>
+    <a class="btn" href="{{ url_for('enrollments.create', aluno=student.id) }}">Nova matrícula</a>
+  </div>
+</div>
+
+<div class="grid two-col">
+  <section class="card">
+    <h2>Dados</h2>
+    {% if scholarship_active %}<p><span class="badge pago">Bolsa Professor ativa — 100% de gratuidade</span></p>{% endif %}
+    <p>Telefone: {{ student.phone or '—' }}</p>
+    <p>E-mail: {{ student.email or '—' }}</p>
+    <p>Nascimento: {{ student.birth_date.strftime('%d/%m/%Y') if student.birth_date else '—' }}</p>
+  </section>
+  <section class="card">
+    <h2>Ações rápidas</h2>
+    <p class="muted">Renove, cancele ou registre pagamento a partir das matrículas abaixo.</p>
+  </section>
+</div>
+
+<section class="card" style="margin-top:16px">
+  <h2>Matrículas</h2>
+  {% if student.enrollments %}
+  <table>
+    <thead>
+      <tr><th>Plano</th><th>Início</th><th>Fim</th><th>Status</th><th>Pagamento</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for e in student.enrollments %}
+      <tr>
+        <td>{{ e.plan.name }}</td>
+        <td>{{ e.start_date.strftime('%d/%m/%Y') }}</td>
+        <td>{{ e.end_date.strftime('%d/%m/%Y') }}</td>
+        <td><span class="badge {{ e.status }}">{{ e.status }}</span></td>
+        <td>
+          {% if scholarship_active %}
+            <span class="badge pago">Bolsa integral — R$ 0,00</span>
+          {% elif e.is_delinquent %}
+            <span class="badge pendente">inadimplente</span>
+          {% else %}
+            <span class="badge pago">em dia</span>
+          {% endif %}
+        </td>
+        <td class="actions">
+          {% if not scholarship_active %}<a class="btn small" href="{{ url_for('payments.create', matricula=e.id) }}">Pagar</a>{% endif %}
+          {% if e.status != 'cancelada' %}
+          <form method="post" action="{{ url_for('enrollments.renew', enrollment_id=e.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn small secondary" type="submit">Renovar</button>
+          </form>
+          <form method="post" action="{{ url_for('enrollments.cancel', enrollment_id=e.id) }}" onsubmit="return confirm('Cancelar esta matrícula?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn small danger" type="submit">Cancelar</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Este aluno ainda não tem matrícula.</p>
+  {% endif %}
+</section>
+{% endblock %}

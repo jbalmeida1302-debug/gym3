@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Alunos · Academia{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Alunos</h1>
+    <p class="muted">Cadastro e busca de clientes</p>
+  </div>
+  <a class="btn" href="{{ url_for('students.create') }}">Novo aluno</a>
+</div>
+
+<form class="toolbar" method="get" style="margin-bottom:16px">
+  <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nome, CPF, telefone ou e-mail" style="max-width:420px">
+  <button class="btn secondary" type="submit">Buscar</button>
+</form>
+
+<div class="card">
+  {% if students %}
+  <table>
+    <thead>
+      <tr><th>Nome</th><th>CPF</th><th>Telefone</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td><a href="{{ url_for('students.detail', student_id=s.id) }}">{{ s.name }}</a></td>
+        <td>{{ s.document }}</td>
+        <td>{{ s.phone or '—' }}</td>
+        <td><span class="badge {{ s.status }}">{{ s.status }}</span></td>
+        <td><a href="{{ url_for('students.edit', student_id=s.id) }}">Editar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Nenhum aluno encontrado.</p>
+  {% endif %}
+</div>
+{% endblock %}
